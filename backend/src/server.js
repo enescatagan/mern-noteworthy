@@ -2,16 +2,16 @@ import express from "express";
 import notesRouter from "./routes/notes_routes.js";
 import { connectDB } from "./config/db.js";
 import dotenv from "dotenv";
+import rateLimiter from "./middleware/rateLimiter.js";
 
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 5001;
 
-connectDB();
-
 // Middleware
-app.use(express.json());  // To parse JSON request bodies
+app.use(express.json()); // To parse JSON request bodies
+app.use(rateLimiter);
 
 // Simple Custom Middleware
 // app.use((req, res, next) => {
@@ -21,6 +21,8 @@ app.use(express.json());  // To parse JSON request bodies
 
 app.use("/api/notes", notesRouter);
 
-app.listen(PORT, () => {
-  console.log("Server is running on PORT:", PORT);
+connectDB().then(() => {
+  app.listen(PORT, () => {
+    console.log("Server is running on PORT:", PORT);
+  });
 });
